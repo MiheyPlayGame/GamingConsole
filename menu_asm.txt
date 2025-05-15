@@ -1,0 +1,83 @@
+; === RESET VECTOR ===
+BRA start
+
+; === START ===
+start:
+    LDI R1, #0
+    LDI R2, #C0
+
+clear_vram:
+    STR [R0], R1
+    ADD R0, R0, #1
+    SUB R2, R2, #1
+    BRZ clear_done
+    BRA clear_vram
+
+clear_done:
+
+; Вывод строки "MENU"
+    LDI R3, text_MENU
+    LDI R4, #0
+    LDI R5, #0
+    JSR drawString
+
+; Вывод строки "> TETRIS"
+    LDI R3, text_TETRIS
+    LDI R4, selectedOption
+    LDI R5, #20
+    JSR drawString
+
+; Вывод строки "  BIRD"
+    LDI R3, text_BIRD
+    LDI R4, selectedOption
+    LDI R5, #30
+    JSR drawString
+
+; Вывод строки "  SOON"
+    LDI R3, text_SOON
+    LDI R4, selectedOption
+    LDI R5, #40
+    JSR drawString
+
+main_loop:
+    JSR check_buttons
+    CMP R0, #0
+    BRZ no_input
+    CMP R0, #1
+    BRZ handle_left
+    CMP R0, #2
+    BRZ handle_right
+    CMP R0, #3
+    BRZ launch_game
+
+no_input:
+    BRA main_loop
+
+handle_left:
+    LDI R0, selectedOption
+    LDR R0, R0
+    SUB R0, R0, #1
+    STR [R0], R0
+    BRA redraw
+
+handle_right:
+    LDI R0, selectedOption
+    LDR R0, R0
+    ADD R0, R0, #1
+    STR [R0], R0
+    BRA redraw
+
+redraw:
+    JSR drawMenu
+    BRA main_loop
+
+launch_game:
+    BRA main_loop
+
+; === DATA ===
+selectedOption: .byte 0
+
+text_MENU:   .asciiz "MENU"
+text_TETRIS: .asciiz "> TETRIS"
+text_BIRD:   .asciiz "  BIRD"
+text_SOON:   .asciiz "  SOON"
